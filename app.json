@@ -12,13 +12,21 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.kandi.Suunnistus",
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "***REMOVED***"
+      }
     },
     "android": {
+      "package": "com.kandi.Suunnistus",
+      "config": {
+        "googleMaps": {
+          "apiKey": "***REMOVED***"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -30,8 +38,19 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Fuksisuunnistus to use your location."
+        }
+      ]
     ],
+    "extra": {
+      "eas": {
+        "projectId": "***REMOVED***"
+      }
+    },
     "experiments": {
       "typedRoutes": true
     }

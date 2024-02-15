@@ -1,14 +1,31 @@
 import { StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
+import React from 'react';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Text, View } from '@/components/Themed';
+import MapStyle from '@/constants/MapStyle.json';
 
-export default function TabOneScreen() {
+
+// Oulu Linnanmaa
+const initialRegion = {
+  latitude: 65.0608,
+  longitude: 25.4694,
+  latitudeDelta: 0.0922,
+  longitudeDelta: 0.0421,
+};
+
+export default function MapScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+      <MapView 
+        style={styles.map} 
+        initialRegion={initialRegion}
+        minZoomLevel={10}
+        maxZoomLevel={20}
+        showsMyLocationButton={true}
+        showsUserLocation={true}
+        provider={PROVIDER_GOOGLE}
+        customMapStyle={MapStyle}
+      />
     </View>
   );
 }
@@ -19,13 +36,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
+
+  map: {
+    width: '100%',
+    height: '100%',
+  }
 });
