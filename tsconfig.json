@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/_layout.jsx", "context/UserLocationContext.jsx", "context/AuthContext.jsx", "app/(tabs)/profile/_layout.jsx"  ]
+, "app/_layout.jsx", "context/UserLocationContext.jsx", "context/AuthContext.jsx", "suunnistus/kartta.tsx"  ]
 }

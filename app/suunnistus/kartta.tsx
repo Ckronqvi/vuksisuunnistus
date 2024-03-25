@@ -1,8 +1,9 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Text, View } from '@/components/Themed';
 import MapStyle from '@/constants/MapStyle.json';
+import { useAuth } from '@/context/AuthContext';
 
 
 // Oulu Linnanmaa
@@ -14,6 +15,8 @@ const initialRegion = {
 };
 
 export default function MapScreen() {
+  const {logout} = useAuth();
+
   return (
     <View style={styles.container}>
       <MapView 

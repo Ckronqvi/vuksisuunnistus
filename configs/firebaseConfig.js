@@ -15,9 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage)
-});
-
 export const db = getFirestore(app);
-export const userRef = collection(db, 'users'); 
+export const suunnistuksetRef = collection(db, 'suunnistukset'); 
+export const privateIdsRef = collection(db, 'private_ids'); 
+export const pubIdsRef = collection(db, 'pub_ids');

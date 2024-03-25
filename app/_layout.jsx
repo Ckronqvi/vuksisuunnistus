@@ -1,11 +1,12 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useSegments, useRouter, Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 
+import { useAuth } from '@/context/AuthContext';
 import { useColorScheme } from '@/components/useColorScheme';
 import { UserLocationContext } from '../context/UserLocationContext';
 import { AuthContextProvider } from '../context/AuthContext';
@@ -18,7 +19,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: '/',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -45,7 +46,11 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <AuthContextProvider>
+      <RootLayoutNav />
+    </AuthContextProvider>
+  );
 }
 
 function RootLayoutNav() {
@@ -74,17 +79,35 @@ function RootLayoutNav() {
     text = JSON.stringify(location);
   }
 
+    const {isLoggedIn} = useAuth();
+    const segments = useSegments();
+    const router = useRouter();
+
+    useEffect(() => {
+      if (typeof isLoggedIn == 'undefined') {
+          router.replace('/'); //TODO: Tähän lataus ruutu tai joku sellanen...
+      }
+      // check if user is in user segment
+      const isInUserPage = (segments.includes('suunnistus'));
+      if (isLoggedIn && !isInUserPage) {
+          router.replace('suunnistus');
+      } else if (!isLoggedIn) {
+          router.replace('/');
+      }
+  }, [isLoggedIn]);
+
   return (
-    <AuthContextProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <UserLocationContext.Provider value={{ location, setLocation }}>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="modal" options={{ presentation: 'modal', title: "Pisteet"}} />
-            </Stack>
-        </UserLocationContext.Provider>
-      </ThemeProvider>
-    </AuthContextProvider>
+    
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <UserLocationContext.Provider value={{ location, setLocation }}>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="suunnistus" options={{ headerShown: false }} />
+            <Stack.Screen name="luoSuunnistus" options={{headerShown: false}} />
+          </Stack>
+      </UserLocationContext.Provider>
+    </ThemeProvider>
+    
   );
 }
 

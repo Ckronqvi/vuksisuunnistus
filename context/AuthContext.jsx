@@ -1,47 +1,137 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { auth, db } from "../configs/firebaseConfig";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+  auth,
+  db,
+  suunnistuksetRef,
+  privateIdsRef,
+  pubIdsRef,
+} from "../configs/firebaseConfig";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(undefined);
-  const [userData, setUserData] = useState({}); // [email, username, guild, uid, role
+  const [privateCode, setPrivateCode] = useState(null); //Vain rastinpitäjillä on GM-koodi
+  const [suunnistusRef, setSuunnistusRef] = useState(undefined); // Suunnistus dokumenttiin ref
+  const [suunnistusID, setSuunnistusID] = useState(undefined);
+  const [isLoggedIn, setIsLoggedIn] = useState(undefined);
 
-  // Check if user is logged in
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setIsAuthenticated(user ? true : false);
-    });
-    return unsubscribe;
-  }, []);
-
-  // Function to save userData to AsyncStorage
-  const saveUserDataToStorage = async (data) => {
+  // Get "suunnistus" from the pubIdsRef by public code
+  const loginViaPubId = async (pub_code) => {
     try {
-      await AsyncStorage.setItem("userData", JSON.stringify(data));
+      const docRef = doc(pubIdsRef, pub_code);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setSuunnistusRef(docSnap.data().suunnistus);
+        setSuunnistusID(docSnap.data().suunnistus.id);
+        // Save the suunnistusID to AsyncStorage for persistence
+        await AsyncStorage.setItem(
+          "suunnistusID",
+          docSnap.data().suunnistus.id
+        ).then(setIsLoggedIn(true));
+        return { success: true };
+      } else {
+        return { success: false, error: "Koodia ei löytynyt" };
+      }
     } catch (error) {
-      console.error("Error saving user data to AsyncStorage:", error);
+      console.error("Error getting suunnistusID:", error);
+      return {
+        success: false,
+        error: "Virhe kirjautumisessa, yritä uudelleen.",
+      };
     }
   };
 
-  // Function to load userData from AsyncStorage
+  // Get "suunnistus" from the privateIdsRef by private code
+  const loginViaPrivateId = async (priv_code) => {
+    try {
+      const docRef = doc(privateIdsRef, priv_code);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setSuunnistusRef(docSnap.data().suunnistus);
+        setSuunnistusID(docSnap.data().suunnistus.id);
+        // Save the suunnistusID and private code to AsyncStorage for persistence
+        await AsyncStorage.setItem("privateCode", priv_code).then(
+          await AsyncStorage.setItem(
+            "suunnistusID",
+            docSnap.data().suunnistus.id
+          )
+            .then(setIsLoggedIn(true))
+            .then(setPrivateCode(priv_code))
+        );
+        return { success: true };
+      } else {
+        return { success: false, error: "Koodia ei löytynyt" };
+      }
+    } catch (error) {
+      console.error("Error getting suunnistusID:", error);
+      return {
+        success: false,
+        error: "Virhe kirjautumisessa, yritä uudelleen.",
+      };
+    }
+  };
+
+  // log the user out by setting suunnistusRef to null
+  const logout = async () => {
+    setSuunnistusRef(null);
+    setPrivateCode(null);
+    setSuunnistusID(null);
+    setIsLoggedIn(false);
+    await AsyncStorage.removeItem("privateCode");
+    await AsyncStorage.removeItem("suunnistusID");
+  };
+
   const loadUserDataFromStorage = async () => {
     try {
-      const userDataJSON = await AsyncStorage.getItem("userData");
-      if (userDataJSON) {
-        const userData = JSON.parse(userDataJSON);
-        setUserData(userData);
+      const suunnistusID = await AsyncStorage.getItem("suunnistusID");
+      const privateCode = await AsyncStorage.getItem("privateCode");
+      if (suunnistusID) {
+        setSuunnistusID(suunnistusID);
+        // Get suunnistusRef from suunnistusID
+        const docRef = doc(suunnistuksetRef, suunnistusID); //TODO: Tää on erillainen ku loginViaPubId funktion ref, omituista.
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setSuunnistusRef(docSnap.data());
+          setIsLoggedIn(true);
+        }
+      } else {
+        setSuunnistusRef(null);
+        setSuunnistusID(null);
+        setIsLoggedIn(false);
+      }
+      if (privateCode) {
+        setPrivateCode(privateCode);
       }
     } catch (error) {
       console.error("Error loading user data from AsyncStorage:", error);
+    }
+  };
+
+  // TODO: Lisää rasti. 
+  const addRasti = async (rasti) => {
+    try {
+      // lisää rasti
+    } catch (error) {
+      console.error("Error adding rasti:", error);
+    }
+  };
+
+  //TODO luo uusi suunnistus
+  const createSuunnistus = async (suunnistus) => {
+    try {
+      // luo uusi suunnistus
+      const success = false;
+      while (!success) {
+        const privateCode = createRandomPrivateCode(); // Random 10 number string
+        const pubCode = createRandomCode(); // Random 4 number string
+        // Tarkista onko koodit jo käytössä
+        // Jos ei ole, luo uusi suunnistus
+        // Jos on jatka while loopia
+      }
+      // Tallenna tieto tästä suunnistuksesta johonkin muuttujaan
+    } catch (error) {
+      console.error("Error creating suunnistus:", error);
     }
   };
 
@@ -50,98 +140,20 @@ export const AuthContextProvider = ({ children }) => {
     loadUserDataFromStorage();
   }, []);
 
-  // Sign up
-  const signUp = async (email, username, password, guild) => {
-    try {
-      const response = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      //DATABASE KUTSU JOKA LISÄÄ UUDEN KÄYTTÄJÄN + MUUT TARVITTAVAT TIEDOT
-      await setDoc(doc(db, "users", response?.user?.uid), {
-        email: email,
-        username: username,
-        guild: guild,
-        uid: response.user.uid,
-        role: "Suunnistaja",
-      });
-      const userData = {
-        email: email,
-        username: username,
-        guild: guild,
-        uid: response.user.uid,
-        role: "Suunnistaja",
-      };
-      setUserData(userData);
-      saveUserDataToStorage(userData);
-      return { success: true };
-    } catch (error) {
-      const errorMessage = parseErrorMessage(error.code);
-      return { success: false, error: errorMessage };
-    }
-  };
-
-  // Sign in
-  const signIn = async (email, password) => {
-    try {
-      const response = await signInWithEmailAndPassword(auth, email, password);
-      const userData = await getUserData(response.user.uid);
-      setUserData(userData);
-      saveUserDataToStorage(userData);
-      return { success: true };
-    } catch (error) {
-      const errorMessage = parseErrorMessage(error.code);
-      return { success: false, error: errorMessage };
-    }
-  };
-
-  // Sign out
-  const signOut = async () => {
-    try {
-      await auth.signOut();
-      setUserData({}); // Clear User Data
-      await AsyncStorage.removeItem('userData');
-      return { success: true };
-    } catch (error) {
-      console.log(error);
-      return { success: true, error: error };
-    }
-  };
-
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, signIn, signUp, signOut, userData }}
+      value={{
+        loginViaPubId,
+        loginViaPrivateId,
+        suunnistusID,
+        logout,
+        isLoggedIn,
+        privateCode,
+      }} // TODO: Poista ylimääräset sitte lopuks.
     >
       {children}
     </AuthContext.Provider>
   );
-};
-
-// private function to parse error messages
-const parseErrorMessage = (error) => {
-  if (error == "auth/wrong-password") {
-    return "Väärä salasana";
-  } else if (error == "auth/user-not-found") {
-    return "Käyttäjää ei löytynyt";
-  } else if (error == "auth/invalid-email") {
-    return "Sähköposti on väärässä muodossa";
-  } else if (error == "auth/invlid-credential") {
-    return "Sähköposti tai salana on väärin";
-  } else {
-    return "Virhe kirjautumisessa, yritä uudelleen.";
-  }
-};
-
-// Get user data from database
-const getUserData = async (uid) => {
-  const docRef = doc(db, "users", uid);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return docSnap.data();
-  } else {
-    return null;
-  }
 };
 
 export const useAuth = () => {
@@ -150,4 +162,14 @@ export const useAuth = () => {
     throw new Error("useAuth must be used within an AuthProvider!");
   }
   return value;
+};
+
+// function that creates random 4 number string
+export const createRandomCode = () => {
+  return Math.floor(1000 + Math.random() * 9000);
+};
+
+// function that create random 10 number string
+export const createRandomPrivateCode = () => {
+  return Math.floor(1000000000 + Math.random() * 9000000000);
 };
