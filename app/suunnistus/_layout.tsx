@@ -105,8 +105,7 @@ export function AdminTabLayout() {
         name="rasti"
         options={{
           headerShown: false,
-          title: 'Rastit',
-          tabBarIcon: ({ color }) => <TabBarIcon name="thumb-tack" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="thumb-tack" color={color} />,        
         }}
       />
     </Tabs>

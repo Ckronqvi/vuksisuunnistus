@@ -6,15 +6,25 @@ import {
   privateIdsRef,
   pubIdsRef,
 } from "../configs/firebaseConfig";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  setDocs,
+  collection,
+  GeoPoint,
+  getDocs,
+  onSnapshot,
+  query,
+} from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
   const [privateCode, setPrivateCode] = useState(null); //Vain rastinpitäjillä on GM-koodi
-  const [suunnistusRef, setSuunnistusRef] = useState(undefined); // Suunnistus dokumenttiin ref
   const [suunnistusID, setSuunnistusID] = useState(undefined);
   const [isLoggedIn, setIsLoggedIn] = useState(undefined);
+  const [rastit, setRastit] = useState([]);
 
   // Get "suunnistus" from the pubIdsRef by public code
   const loginViaPubId = async (pub_code) => {
@@ -22,7 +32,6 @@ export const AuthContextProvider = ({ children }) => {
       const docRef = doc(pubIdsRef, pub_code);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setSuunnistusRef(docSnap.data().suunnistus);
         setSuunnistusID(docSnap.data().suunnistus.id);
         // Save the suunnistusID to AsyncStorage for persistence
         await AsyncStorage.setItem(
@@ -48,7 +57,6 @@ export const AuthContextProvider = ({ children }) => {
       const docRef = doc(privateIdsRef, priv_code);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setSuunnistusRef(docSnap.data().suunnistus);
         setSuunnistusID(docSnap.data().suunnistus.id);
         // Save the suunnistusID and private code to AsyncStorage for persistence
         await AsyncStorage.setItem("privateCode", priv_code).then(
@@ -72,9 +80,7 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  // log the user out by setting suunnistusRef to null
   const logout = async () => {
-    setSuunnistusRef(null);
     setPrivateCode(null);
     setSuunnistusID(null);
     setIsLoggedIn(false);
@@ -84,36 +90,47 @@ export const AuthContextProvider = ({ children }) => {
 
   const loadUserDataFromStorage = async () => {
     try {
-      const suunnistusID = await AsyncStorage.getItem("suunnistusID");
-      const privateCode = await AsyncStorage.getItem("privateCode");
-      if (suunnistusID) {
-        setSuunnistusID(suunnistusID);
-        // Get suunnistusRef from suunnistusID
-        const docRef = doc(suunnistuksetRef, suunnistusID); //TODO: Tää on erillainen ku loginViaPubId funktion ref, omituista.
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setSuunnistusRef(docSnap.data());
-          setIsLoggedIn(true);
-        }
+      const suunnistusIDFromStorage = await AsyncStorage.getItem(
+        "suunnistusID"
+      );
+      const privateCodeFromStorage = await AsyncStorage.getItem("privateCode");
+      if (suunnistusIDFromStorage) {
+        setSuunnistusID(suunnistusIDFromStorage);
+        setIsLoggedIn(true);
       } else {
-        setSuunnistusRef(null);
         setSuunnistusID(null);
         setIsLoggedIn(false);
       }
-      if (privateCode) {
-        setPrivateCode(privateCode);
+      if (privateCodeFromStorage) {
+        setPrivateCode(privateCodeFromStorage);
       }
     } catch (error) {
       console.error("Error loading user data from AsyncStorage:", error);
     }
   };
 
-  // TODO: Lisää rasti. 
-  const addRasti = async (rasti) => {
+  const addRasti = async (nimi, kuvaus, sijainti) => {
+    if (!privateCode) {
+      return { success: false, error: "Ei ole oikeuksia!" };
+    }
+    const isValid = await isValidPrivateCode(privateCode, suunnistusID);
+    if (!isValid) {
+      return { success: false, error: "Ei ole oikeuksia!" };
+    }
     try {
-      // lisää rasti
+      // create a geo point from the location object
+      const geoSijainti = new GeoPoint(sijainti.latitude, sijainti.longitude);
+      // add the rasti to the database
+      const docRef = doc(collection(suunnistuksetRef, suunnistusID, "rastit"));
+      await setDoc(docRef, {
+        nimi,
+        kuvaus,
+        sijainti: geoSijainti,
+      })
+      return { success: true };
     } catch (error) {
       console.error("Error adding rasti:", error);
+      return { success: false, error: "Virhe rastin lisäämisessä" };
     }
   };
 
@@ -140,15 +157,30 @@ export const AuthContextProvider = ({ children }) => {
     loadUserDataFromStorage();
   }, []);
 
+  useEffect(() => {
+    if (suunnistusID) {
+      const q = query(collection(suunnistuksetRef, suunnistusID, "rastit"));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const updatedRastit = snapshot.docs.map((doc) => {
+          const rastiData = doc.data();
+          return { id: doc.id, ...rastiData };
+        });
+        setRastit(updatedRastit);
+      });
+      return unsubscribe;
+    }
+  }, [suunnistusID]);
+
   return (
     <AuthContext.Provider
       value={{
         loginViaPubId,
         loginViaPrivateId,
-        suunnistusID,
         logout,
+        addRasti,
         isLoggedIn,
         privateCode,
+        rastit,
       }} // TODO: Poista ylimääräset sitte lopuks.
     >
       {children}
@@ -172,4 +204,19 @@ export const createRandomCode = () => {
 // function that create random 10 number string
 export const createRandomPrivateCode = () => {
   return Math.floor(1000000000 + Math.random() * 9000000000);
+};
+
+export const isValidPrivateCode = async (code, suunnistusID) => {
+  try {
+    const docRef = doc(privateIdsRef, code);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return suunnistusID == docSnap.data().suunnistus.id;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error("Error getting private code:", error);
+    return false;
+  }
 };

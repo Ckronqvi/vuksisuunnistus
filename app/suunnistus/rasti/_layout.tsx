@@ -16,9 +16,13 @@ export default function StackLayout() {
       <Stack.Screen
         name="rastit"
         options={{
-          title: 'Rastit',
-          headerTransparent: true,
-          headerBlurEffect: 'light',
+          headerShown: false
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="addRasti"
+        options={{
+          headerShown: false,
         }}
       ></Stack.Screen>
     </Stack>
