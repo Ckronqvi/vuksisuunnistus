@@ -73,10 +73,25 @@ const AddRasti = () => {
           </View>
         )}
         {locationPicked && (
-          <View style={styles.textContainer}>
-            <Text style={styles.textTitle}>Valittu sijainti:</Text>
-            <Text>{`Latitude: ${locationPicked.latitude}, Longitude: ${locationPicked.longitude}`}</Text>
-          </View>
+            <View style={styles.textContainer}>
+              <Text style={styles.textTitle}>Valittu sijainti:</Text>
+            </View>
+        )}
+        {(locationPicked && !showMapView) && (
+          <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: locationPicked.latitude,
+            longitude: locationPicked.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01
+          }}
+          scrollEnabled={false}
+          provider={PROVIDER_GOOGLE}
+          customMapStyle={MapStyle}
+        >
+          <Marker coordinate={locationPicked}></Marker>
+        </MapView>
         )}
         {showMapView && (
           <MapView
