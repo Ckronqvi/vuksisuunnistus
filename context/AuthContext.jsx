@@ -25,6 +25,8 @@ export const AuthContextProvider = ({ children }) => {
   const [suunnistusID, setSuunnistusID] = useState(undefined);
   const [isLoggedIn, setIsLoggedIn] = useState(undefined);
   const [rastit, setRastit] = useState([]);
+  // SUUNNISTUKSET LUOMISEEN: luodutSuunnistukset = {pubCode, privCode}
+  const [luotuSuunnistus, setLuotuSuunnistus] = useState(null);
 
   // Get "suunnistus" from the pubIdsRef by public code
   const loginViaPubId = async (pub_code) => {
@@ -84,6 +86,7 @@ export const AuthContextProvider = ({ children }) => {
     setPrivateCode(null);
     setSuunnistusID(null);
     setIsLoggedIn(false);
+    setRastit([]);
     await AsyncStorage.removeItem("privateCode");
     await AsyncStorage.removeItem("suunnistusID");
   };
@@ -94,6 +97,14 @@ export const AuthContextProvider = ({ children }) => {
         "suunnistusID"
       );
       const privateCodeFromStorage = await AsyncStorage.getItem("privateCode");
+      const luotuSuunnistusFromStorage = await AsyncStorage.getItem(
+        "luotuSuunnistus"
+      );
+
+      if (luotuSuunnistusFromStorage) {
+        setLuotuSuunnistus(JSON.parse(luotuSuunnistusFromStorage));
+      }
+
       if (suunnistusIDFromStorage) {
         setSuunnistusID(suunnistusIDFromStorage);
         setIsLoggedIn(true);
@@ -126,7 +137,7 @@ export const AuthContextProvider = ({ children }) => {
         nimi,
         kuvaus,
         sijainti: geoSijainti,
-      })
+      });
       return { success: true };
     } catch (error) {
       console.error("Error adding rasti:", error);
@@ -135,22 +146,61 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   //TODO luo uusi suunnistus
-  const createSuunnistus = async (suunnistus) => {
+  const createSuunnistus = async () => {
     try {
-      // luo uusi suunnistus
       const success = false;
       while (!success) {
         const privateCode = createRandomPrivateCode(); // Random 10 number string
         const pubCode = createRandomCode(); // Random 4 number string
-        // Tarkista onko koodit jo käytössä
-        // Jos ei ole, luo uusi suunnistus
-        // Jos on jatka while loopia
+
+        // Check if the public code already exists
+        const pubCodeDocRef = doc(pubIdsRef, pubCode.toString());
+        const pubCodeDocSnap = await getDoc(pubCodeDocRef);
+        if (pubCodeDocSnap.exists()) {
+          continue;
+        }
+
+        // Check if the private code already exists
+        const privateCodeDocRef = doc(privateIdsRef, privateCode.toString());
+        const privateCodeDocSnap = await getDoc(privateCodeDocRef);
+        if (privateCodeDocSnap.exists()) {
+          continue;
+        }
+
+        const suunnistusRef = doc(suunnistuksetRef);
+        await setDoc(suunnistusRef, { created: new Date() });
+
+        // Create a new public code document with pubCode as the ID
+        await setDoc(pubCodeDocRef, { suunnistus: suunnistusRef });
+        // Create a new private code document
+        await setDoc(privateCodeDocRef, { suunnistus: suunnistusRef });
+        // Save the codes to the state luotSuunnistus state
+        setLuotuSuunnistus({ pubCode, privateCode });
+        // Save the luotuSuunnistus to AsyncStorage for persistence
+        await AsyncStorage.setItem(
+          "luotuSuunnistus",
+          JSON.stringify({ pubCode, privateCode })
+        );
+        return { success: true };
       }
       // Tallenna tieto tästä suunnistuksesta johonkin muuttujaan
     } catch (error) {
       console.error("Error creating suunnistus:", error);
+      return { success: false, error: "Virhe suunnituksen luomisessa" };
     }
   };
+
+  // just deletes the reference for now
+  const endSuunnistus = async () => {
+    try {
+      await AsyncStorage.removeItem("privateCode");
+      setLuotuSuunnistus(null);
+      return { success: true };
+    } catch (error) {
+      console.error("Error ending suunnistus:", error);
+      return { success: false, error: "Virhe suunnituksen lopettamisessa" };
+    }
+  }
 
   // Load user data from AsyncStorage when component mounts
   useEffect(() => {
@@ -174,13 +224,16 @@ export const AuthContextProvider = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
+        endSuunnistus,
         loginViaPubId,
         loginViaPrivateId,
         logout,
+        createSuunnistus,
         addRasti,
         isLoggedIn,
         privateCode,
         rastit,
+        luotuSuunnistus,
       }} // TODO: Poista ylimääräset sitte lopuks.
     >
       {children}

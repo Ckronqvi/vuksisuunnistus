@@ -57,29 +57,26 @@ const AddRasti = () => {
       <View style={styles.container}>
         {!showMapView && (
           <View style={styles.textContainer}>
-            <Text style={styles.textTitle}>Nimi:</Text>
+            <Text style={styles.textTitle}>Nimi*</Text>
             <TextInput
               style={styles.textInput}
               value={name}
               onChangeText={setName}
+              placeholder="Rastin nimi"
             />
-            <Text style={styles.textTitle}>Kuvaus:</Text>
+            <Text style={styles.textTitle}>Kuvaus*</Text>
             <TextInput
               style={styles.textInputDescription}
               value={description}
               onChangeText={setDescription}
               multiline={true}
+              placeholder="Rastin kuvaus"
             />
           </View>
         )}
-        {locationPicked && (
-            <View style={styles.textContainer}>
-              <Text style={styles.textTitle}>Valittu sijainti:</Text>
-            </View>
-        )}
         {(locationPicked && !showMapView) && (
           <MapView
-          style={styles.map}
+          style={styles.smallmap}
           initialRegion={{
             latitude: locationPicked.latitude,
             longitude: locationPicked.longitude,
@@ -121,10 +118,10 @@ const AddRasti = () => {
         {!showMapView && (
           <View style={styles.bottomButtonContainer}>
             <TouchableOpacity
-              style={styles.button}
+              style={styles.cancelButton}
               onPress={() => router.push("/suunnistus/rasti/rastit")}
             >
-              <Text style={styles.buttonText}>Peruuta</Text>
+              <Text style={styles.cancelButtonText}>Peruuta</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
@@ -153,52 +150,78 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
     width: "100%",
-    maxHeight: "80%",
+    maxHeight: "100%",
+  },
+  smallmap: {
+    width: "90%",
+    height: "20%",
+    marginBottom: 20,
+    borderBlockColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
   },
   textContainer: {
     width: "100%",
     padding: 20,
   },
   textTitle: {
-    fontWeight: "bold",
+    fontWeight: "regular",
     marginBottom: 5,
+    fontSize: 20,
+    color: "gray",
   },
   textInput: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 50,
     width: "100%",
+    fontSize: 20,
   },
   textInputDescription: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
-    marginBottom: 20,
+    marginBottom: 10,
     height: 100,
     width: "100%",
     textAlignVertical: "top",
+    fontSize: 18,
   },
   bottomButtonContainer: {
     position: "absolute",
-    bottom: 20,
+    bottom: 30,
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
-    padding: 20,
+    padding: 30,
+    paddingBottom: 50,
   },
   button: {
-    backgroundColor: "blue",
+    backgroundColor: "#007AFF",
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     borderRadius: 5,
     marginHorizontal: 10,
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    marginHorizontal: 10,
+    borderBlockColor: "gray",
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    color: "gray",
+    fontSize: 22,
     fontWeight: "bold",
   },
 });
