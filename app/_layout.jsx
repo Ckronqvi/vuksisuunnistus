@@ -16,6 +16,7 @@ import { UserLocationContext } from "../context/UserLocationContext";
 import { AuthContextProvider } from "../context/AuthContext";
 
 import { RootSiblingParent } from "react-native-root-siblings";
+import { Alert } from "react-native";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -63,13 +64,15 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
+        Alert.alert(
+          "Ei sijaintilupaa",
+          "Salli sijainnin käyttö puhelimen asetuksissa."
+        );
         return;
       }
 
@@ -77,13 +80,6 @@ function RootLayoutNav() {
       setLocation(location);
     })();
   }, []);
-
-  let text = "Waiting..";
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-  }
 
   const { isLoggedIn } = useAuth();
   const segments = useSegments();
@@ -98,7 +94,7 @@ function RootLayoutNav() {
     if (isLoggedIn && !isInUserPage) {
       router.replace("suunnistus");
     } else if (!isLoggedIn) {
-      router.replace("/"); //TODO muuta takas
+      router.replace("/");
     }
   }, [isLoggedIn]);
 

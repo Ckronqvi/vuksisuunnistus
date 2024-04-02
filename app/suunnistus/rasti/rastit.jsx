@@ -1,11 +1,11 @@
-import { View, Text } from '@/components/Themed'
-import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import {useAuth} from '@/context/AuthContext'
-import {useRouter} from 'expo-router'
+import { View, Text } from "@/components/Themed";
+import React, { useState, useEffect } from "react";
+import { TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "expo-router";
 
 const Rastit = () => {
-  const { getRastit, addRasti, rastit } = useAuth();
+  const { rastit } = useAuth();
   const [rastitData, setRastitData] = useState([]);
   const router = useRouter();
 
@@ -14,7 +14,7 @@ const Rastit = () => {
       try {
         setRastitData(rastit);
       } catch (error) {
-        console.error('Error fetching rastit:', error);
+        console.error("Error fetching rastit:", error);
       }
     };
 
@@ -25,12 +25,11 @@ const Rastit = () => {
     <View style={styles.itemContainer}>
       <Text style={styles.itemTitle}>{item.nimi}</Text>
       <Text>{item.kuvaus}</Text>
-      <Text>{`Latitude: ${item.sijainti.latitude}, Longitude: ${item.sijainti.longitude}`}</Text>
     </View>
   );
 
   const handleAddRasti = () => {
-    router.replace('/suunnistus/rasti/addRasti');
+    router.push("/suunnistus/rasti/addRasti");
   };
 
   return (
@@ -44,9 +43,9 @@ const Rastit = () => {
           style={styles.flatList}
         />
       </View>
-     
+
       <TouchableOpacity style={styles.addButton} onPress={handleAddRasti}>
-        <Text style={styles.addButtonText}>Lisää rasti</Text>
+        <Text style={styles.addButtonText}>Luo rasti</Text>
       </TouchableOpacity>
     </View>
   );
@@ -56,46 +55,46 @@ const Rastit = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 30,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   listContainer: {
     flex: 1,
-    width: '100%',
-    maxHeight: '60%',
+    width: "100%",
+    maxHeight: "60%",
     marginBottom: 20,
   },
   flatList: {
-    width: '100%',
+    width: "100%",
   },
   itemContainer: {
     marginBottom: 10,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
   },
   itemTitle: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#236c87",
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     borderRadius: 5,
-    marginTop: 30,
+    marginHorizontal: 10,
   },
   addButtonText: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: 'bold',
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
   },
 });
 

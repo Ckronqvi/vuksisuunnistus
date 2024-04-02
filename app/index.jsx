@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import Toast from "react-native-root-toast";
 import { Text, View, TextInput } from "@/components/Themed";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "expo-router";
@@ -43,7 +44,18 @@ const Index = () => {
   const handleSubmit = async () => {
     // Check if the code is not empty
     if (code === "" || !(code.length == 4 || code.length == 10)) {
-      Alert.alert("Tarkista syöte");
+      Toast.show("Tarkiste syöte!", {
+        duration: 1100,
+        position: 300,
+        containerStyle: {
+          backgroundColor: "red",
+          borderRadius: 10,
+        },
+        textStyle: {
+          color: "white",
+          fontSize: 20,
+        },
+      });
       return;
     }
     setLoading(false);

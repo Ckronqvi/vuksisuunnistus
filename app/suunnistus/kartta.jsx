@@ -23,7 +23,7 @@ export default function MapScreen() {
       <MapView 
         style={styles.map} 
         initialRegion={initialRegion}
-        minZoomLevel={10}
+        minZoomLevel={5}
         maxZoomLevel={20}
         showsMyLocationButton={true}
         showsUserLocation={true}

@@ -1,19 +1,16 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import {
-  auth,
-  db,
   suunnistuksetRef,
   privateIdsRef,
   pubIdsRef,
 } from "../configs/firebaseConfig";
 import {
+  deleteDoc,
   doc,
   getDoc,
   setDoc,
-  setDocs,
   collection,
   GeoPoint,
-  getDocs,
   onSnapshot,
   query,
 } from "firebase/firestore";
@@ -25,7 +22,7 @@ export const AuthContextProvider = ({ children }) => {
   const [suunnistusID, setSuunnistusID] = useState(undefined);
   const [isLoggedIn, setIsLoggedIn] = useState(undefined);
   const [rastit, setRastit] = useState([]);
-  // SUUNNISTUKSET LUOMISEEN: luodutSuunnistukset = {pubCode, privCode}
+  // SUUNNISTUKSET LUOMISEEN: luodutSuunnistukset = {pubCode, privateCode}
   const [luotuSuunnistus, setLuotuSuunnistus] = useState(null);
 
   // Get "suunnistus" from the pubIdsRef by public code
@@ -145,7 +142,6 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  //TODO luo uusi suunnistus
   const createSuunnistus = async () => {
     try {
       const success = false;
@@ -190,17 +186,26 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  // just deletes the reference for now
+  // Deletes the suunnistus from the database
   const endSuunnistus = async () => {
     try {
-      await AsyncStorage.removeItem("privateCode");
+      await AsyncStorage.removeItem("luotuSuunnistus");
+      const luotuPrivateRef = doc(
+        privateIdsRef,
+        luotuSuunnistus.privateCode.toString()
+      );
+      const docSnap = await getDoc(luotuPrivateRef);
+      const luotuSuunnistusID = docSnap.data().suunnistus.id;
+      await deleteDoc(luotuPrivateRef);
+      await deleteDoc(doc(pubIdsRef, luotuSuunnistus.pubCode.toString()));
+      await deleteDoc(doc(suunnistuksetRef, luotuSuunnistusID));
       setLuotuSuunnistus(null);
       return { success: true };
     } catch (error) {
-      console.error("Error ending suunnistus:", error);
+      console.error("Error ending suunnideleteDocstus:", error);
       return { success: false, error: "Virhe suunnituksen lopettamisessa" };
     }
-  }
+  };
 
   // Load user data from AsyncStorage when component mounts
   useEffect(() => {

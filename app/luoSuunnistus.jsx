@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { TouchableOpacity, StyleSheet, View, Alert, ActivityIndicator } from "react-native";
+import {
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Text, TextInput } from "../components/Themed";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
@@ -23,34 +29,29 @@ const LuoSuunnistus = () => {
       setPrivateCode("");
     }
   }, [luotuSuunnistus]);
-  
-  useEffect(() => {
-    if (loading) {
-      // show Toast
-      Toast.show("Luodaan suunnistusta...", {
-        duration: 2000,
-        position: 300,
-        containerStyle: {
-          backgroundColor: "#236c87",
-          borderRadius: 10,
-        },
-        textStyle: {
-          color: "white",
-          fontSize: 20,
-        },
-      });
-    }
-  }, [loading]);
 
   const handleCreateSuunnistus = async () => {
     setLoading(true);
+    const toast = Toast.show("Luodaan suunnistusta...", {
+      duration: 2000,
+      position: 300,
+      containerStyle: {
+        backgroundColor: "#236c87",
+        borderRadius: 10,
+      },
+      textStyle: {
+        color: "white",
+        fontSize: 20,
+      },
+    });
+
     const response = await createSuunnistus();
     if (response.success) {
       Toast.show("Suunnistus luotu!", {
-        duration: 1500,
+        duration: 1200,
         position: 360,
         containerStyle: {
-          backgroundColor: "#236c87",
+          backgroundColor: "green",
           borderRadius: 10,
         },
         textStyle: {
@@ -62,6 +63,7 @@ const LuoSuunnistus = () => {
       Alert.alert("Virhe", response.error);
     }
     setLoading(false);
+    Toast.hide(toast);
   };
 
   const copyToClipboard = async (code) => {
@@ -81,12 +83,55 @@ const LuoSuunnistus = () => {
   };
 
   const end = async () => {
-    await endSuunnistus();
+    Alert.alert(
+      'Lopetetaanko suunnistus?',
+      'Tämä poistaa kaikki suunnistukseen liittyvät tiedot ja lopettaa suunnistuksen. Haluatko varmasti jatkaa?',
+      [
+        {
+          text: 'Peruuta',
+          style: 'cancel',
+        },
+        {
+          text: 'Kyllä',
+          onPress: async () => {
+            await deleteSuunnistus();
+          }
+        }
+      ]
+    );
   };
 
-  return (
-    loading ? <ActivityIndicator size="large" color="#236c87" style={styles.spinner} /> :
+  const deleteSuunnistus = async () => {
+    setLoading(true);
+    const toast = Toast.show("Lopetetaan suunnistusta...", {
+      duration: 5000,
+      position: 300,
+      containerStyle: {
+        backgroundColor: "#f23d3d",
+        borderRadius: 10,
+      },
+      textStyle: {
+        color: "white",
+        fontSize: 20,
+      },
+    });
+    await endSuunnistus();
+    setLoading(false);
+    Toast.hide(toast);
+  };
+
+  return loading ? (
+    <ActivityIndicator size="large" color="#236c87" style={styles.spinner} />
+  ) : (
     <View style={styles.container}>
+      {publicCode === "" && (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={loading ? null : handleCreateSuunnistus}
+        >
+          <Text style={styles.buttonText}>Luo Suunnistus</Text>
+        </TouchableOpacity>
+      )}
       <View style={styles.codeBox}>
         <Text style={styles.codeTitle}>Jaa suunnistajille:</Text>
         <View style={styles.inputContainer}>
@@ -135,14 +180,6 @@ const LuoSuunnistus = () => {
           <Text style={styles.buttonText}>Lopeta suunnistus</Text>
         </TouchableOpacity>
       )}
-      {publicCode === "" && (
-        <TouchableOpacity
-          style={styles.button}
-          onPress={loading ? null : handleCreateSuunnistus}
-        >
-          <Text style={styles.buttonText}>Luo Suunnistus</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -153,11 +190,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
   },
   spinner: {
     flex: 1,
   },
+
   codeBox: {
     marginBottom: 20,
     marginTop: 50,
