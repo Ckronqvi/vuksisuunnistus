@@ -12,6 +12,7 @@ import { useAuth } from "../context/AuthContext";
 import * as Clipboard from "expo-clipboard";
 import Toast from "react-native-root-toast";
 import { useColorScheme } from "../components/useColorScheme";
+import { buttonColor } from "@/constants/Colors";
 
 const LuoSuunnistus = () => {
   const { createSuunnistus, luotuSuunnistus, endSuunnistus } = useAuth();
@@ -124,15 +125,9 @@ const LuoSuunnistus = () => {
     <ActivityIndicator size="large" color="#236c87" style={styles.spinner} />
   ) : (
     <View style={styles.container}>
-      {publicCode === "" && (
-        <TouchableOpacity
-          style={styles.button}
-          onPress={loading ? null : handleCreateSuunnistus}
-        >
-          <Text style={styles.buttonText}>Luo Suunnistus</Text>
-        </TouchableOpacity>
-      )}
-      <View style={styles.codeBox}>
+      {publicCode !== "" && (
+        <View>
+        <View style={styles.codeBox}>
         <Text style={styles.codeTitle}>Jaa suunnistajille:</Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -158,7 +153,7 @@ const LuoSuunnistus = () => {
         <Text style={styles.codeTitle}>Jaa rastinpitäjille:</Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.codeInputWarning}
+            style={styles.codeInput}
             value={privateCode}
             editable={false}
           />
@@ -168,16 +163,30 @@ const LuoSuunnistus = () => {
               copyToClipboard(privateCode);
             }}
           >
-            <Ionicons name="clipboard" size={30} color="#f23d3d" />
+            <Ionicons
+              name="clipboard"
+              size={30}
+              color={colorScheme === "dark" ? "white" : "black"}
+            />
           </TouchableOpacity>
         </View>
       </View>
+      </View> 
+      )}
       {publicCode !== "" && (
         <TouchableOpacity
           style={styles.buttonEnd}
           onPress={loading ? null : end}
         >
           <Text style={styles.buttonText}>Lopeta suunnistus</Text>
+        </TouchableOpacity>
+      )}
+       {publicCode === "" && (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={loading ? null : handleCreateSuunnistus}
+        >
+          <Text style={styles.buttonText}>Luo Suunnistus</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -225,25 +234,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 10,
   },
-  codeInputWarning: {
-    flex: 1,
-    height: 50,
-    paddingLeft: 30,
-    color: "#f23d3d",
-    fontSize: 30,
-    textAlign: "center",
-    letterSpacing: 2,
-  },
   iconContainer: {
     paddingRight: 10,
   },
   button: {
-    marginTop: 100,
-    margin: 10,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
-    backgroundColor: "#236c87",
+    backgroundColor: buttonColor,
+    // position the button to the bottom of the screen
+    position: "absolute",
+    bottom: '25%',
+
   },
   buttonText: {
     fontSize: 20,
@@ -255,6 +257,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
-    backgroundColor: "#f23d3d",
+    backgroundColor: "#F63E5E",
   },
 });

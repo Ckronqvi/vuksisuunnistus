@@ -1,7 +1,8 @@
-const tintColorLight = '#2f95dc';
-const tintColorDark = '#fff';
-
+const tintColorLight = '#FF6800';
+const tintColorDark = '#FF6800'; //oranssi
+export const buttonColor = '#236C87';
 export default {
+  // light theme
   light: {
     text: '#000',
     background: '#fff',
@@ -9,6 +10,8 @@ export default {
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
   },
+
+  // dark theme
   dark: {
     text: '#fff',
     background: '#000',

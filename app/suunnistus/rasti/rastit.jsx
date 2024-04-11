@@ -1,11 +1,15 @@
 import { View, Text } from "@/components/Themed";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
-import { TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import { TouchableOpacity, FlatList, StyleSheet, Alert } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
+import { buttonColor } from "@/constants/Colors";
+import { set } from "firebase/database";
+import Toast from "react-native-root-toast";
 
 const Rastit = () => {
-  const { rastit } = useAuth();
+  const { rastit, deleteRasti } = useAuth();
   const [rastitData, setRastitData] = useState([]);
   const router = useRouter();
 
@@ -23,13 +27,58 @@ const Rastit = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Text style={styles.itemTitle}>{item.nimi}</Text>
-      <Text>{item.kuvaus}</Text>
+      <View style={styles.itemTextContainer}>
+        <Text style={styles.itemTitle}>{item.nimi}</Text>
+        <Text>{item.kuvaus}</Text>
+      </View>
+      <View style={styles.itemButtonContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            poistaRasti(item.id, item.nimi);
+          }}
+        >
+          <Ionicons name="trash" size={30} color="red" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
   const handleAddRasti = () => {
     router.push("/suunnistus/rasti/addRasti");
+  };
+
+  const poistaRasti = async (id, title) => {
+    Alert.alert("Poista rasti", `Poistetaanko rasti: ${title}?`, [
+      {
+        text: "Peruuta",
+        style: "cancel",
+      },
+      {
+        text: "Poista",
+        onPress: async () => {
+          try {
+            // delete first from the local list Rastit
+            setRastitData((prev) => prev.filter((r) => r.id !== id));
+            const toast = Toast.show("Rasti poistettu", {
+              duration: 500,
+              position: 300,
+              containerStyle: {
+                backgroundColor: "red",
+                borderRadius: 10,
+              },
+              textStyle: {
+                color: "white",
+                fontSize: 20,
+              },
+            });
+            // then delete from the database
+            await deleteRasti(id);
+          } catch (error) {
+            console.error("Error deleting rasti:", error);
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -79,13 +128,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  itemTextContainer: {
+    flex: 1,
+  },
+  itemButtonContainer: {
+    marginLeft: 10,
   },
   itemTitle: {
     fontWeight: "bold",
     marginBottom: 5,
   },
   addButton: {
-    backgroundColor: "#236c87",
+    backgroundColor: buttonColor,
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 5,
@@ -93,7 +151,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: "white",
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
   },
 });

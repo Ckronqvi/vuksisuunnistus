@@ -13,6 +13,7 @@ import { Text, View, TextInput } from "@/components/Themed";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "expo-router";
 import { useColorScheme } from "@/components/useColorScheme";
+import { buttonColor } from "@/constants/Colors";
 
 const Index = () => {
   const [code, setCode] = useState("");
@@ -44,7 +45,7 @@ const Index = () => {
   const handleSubmit = async () => {
     // Check if the code is not empty
     if (code === "" || !(code.length == 4 || code.length == 10)) {
-      Toast.show("Tarkiste syöte!", {
+      Toast.show("Tarkista syöte!", {
         duration: 1100,
         position: 300,
         containerStyle: {
@@ -84,6 +85,7 @@ const Index = () => {
         <TextInput
           style={styles.input}
           placeholder="Syötä koodi"
+          placeholderTextColor="gray"
           onChangeText={handleCodeChange}
           value={code}
           keyoboardType="numeric"
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 200,
+    paddingBottom: 160,
   },
 
   input: {
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 10,
-    backgroundColor: "#00457a",
+    backgroundColor: buttonColor,
     width: "100%",
     height: 50,
     borderRadius: 5,
@@ -166,8 +168,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 300,
-    height: 300,
+    width: 350,
+    height: 350,
   },
 });
 

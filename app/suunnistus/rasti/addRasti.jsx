@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import Toast from "react-native-root-toast";
 import { UserLocationContext } from "@/context/UserLocationContext";
+import { buttonColor } from "@/constants/Colors";
 
 const AddRasti = () => {
   const [description, setDescription] = useState("");
@@ -23,7 +24,7 @@ const AddRasti = () => {
   const { addRasti } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // location from outer context
+  // user's location
   const { location, setLocation } = useContext(UserLocationContext);
 
   const userLocation = location && {
@@ -147,6 +148,7 @@ const AddRasti = () => {
               value={name}
               onChangeText={setName}
               placeholder="Rastin nimi"
+              placeholderTextColor="gray"
             />
             <Text style={styles.textTitle}>Kuvaus*</Text>
             <TextInput
@@ -155,6 +157,7 @@ const AddRasti = () => {
               onChangeText={setDescription}
               multiline={true}
               placeholder="Rastin kuvaus"
+              placeholderTextColor="gray"
             />
           </View>
         )}
@@ -179,7 +182,7 @@ const AddRasti = () => {
               <TouchableOpacity
                 style={{
                   ...styles.button,
-                  backgroundColor: locationPicked ? "#236c87" : "gray",
+                  backgroundColor: locationPicked ? buttonColor : "gray",
                   opacity: locationPicked ? 1 : 0.3,
                   width: "100%",
                   alignItems: "center",
@@ -225,7 +228,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingTop: 50,
-    paddingBottom: 50,
+    paddingBottom: 20,
   },
   karttaTitle: {
     fontSize: 20,
@@ -235,7 +238,7 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "90%",
-    borderBlockColor: "#ccc",
+    borderBlockColor: "gray",
     borderWidth: 1,
     borderRadius: 5,
   },
@@ -246,8 +249,8 @@ const styles = StyleSheet.create({
   },
   smallmap: {
     width: "100%",
-    height: "95%",
-    borderBlockColor: "#ccc",
+    height: "90%",
+    borderBlockColor: "gray",
     borderWidth: 1,
     borderRadius: 5,
   },
@@ -258,7 +261,7 @@ const styles = StyleSheet.create({
   },
   smallMapContainer: {
     width: "100%",
-    height: "25%",
+    height: 130,
     padding: 20,
   },
 
@@ -300,16 +303,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   bottomButtonContainer: {
-    position: "absolute",
-    bottom: 30,
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
     padding: 30,
-    paddingBottom: 50,
+    paddingBottom: 20,
+    marginTop: 30,
   },
   button: {
-    backgroundColor: "#236c87",
+    backgroundColor: buttonColor,
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 5,

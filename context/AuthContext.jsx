@@ -8,6 +8,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   collection,
   GeoPoint,
@@ -22,7 +23,7 @@ export const AuthContextProvider = ({ children }) => {
   const [suunnistusID, setSuunnistusID] = useState(undefined);
   const [isLoggedIn, setIsLoggedIn] = useState(undefined);
   const [rastit, setRastit] = useState([]);
-  // SUUNNISTUKSET LUOMISEEN: luodutSuunnistukset = {pubCode, privateCode}
+  // SUUNNISTUKSET LUOMISEEN: luotuSuunnistus = {pubCode, privateCode}
   const [luotuSuunnistus, setLuotuSuunnistus] = useState(null);
 
   // Get "suunnistus" from the pubIdsRef by public code
@@ -39,7 +40,7 @@ export const AuthContextProvider = ({ children }) => {
         ).then(setIsLoggedIn(true));
         return { success: true };
       } else {
-        return { success: false, error: "Koodia ei löytynyt" };
+        return { success: false, error: "Suunnistusta ei löytynyt annetulla koodilla" };
       }
     } catch (error) {
       console.error("Error getting suunnistusID:", error);
@@ -142,6 +143,27 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const deleteRasti = async (rastiID) => {
+    if (!privateCode) {
+      return { success: false, error: "Ei ole oikeuksia!" };
+    }
+    const isValid = await isValidPrivateCode(privateCode, suunnistusID);
+    if (!isValid) {
+      return { success: false, error: "Ei ole oikeuksia!" };
+    }
+    try {
+      const docRef = doc(
+        collection(suunnistuksetRef, suunnistusID, "rastit"),
+        rastiID
+      );
+      await deleteDoc(docRef);
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting rasti:", error);
+      return { success: false, error: "Virhe rastin poistamisessa" };
+    }
+  };
+
   const createSuunnistus = async () => {
     try {
       const success = false;
@@ -182,7 +204,7 @@ export const AuthContextProvider = ({ children }) => {
       // Tallenna tieto tästä suunnistuksesta johonkin muuttujaan
     } catch (error) {
       console.error("Error creating suunnistus:", error);
-      return { success: false, error: "Virhe suunnituksen luomisessa" };
+      return { success: false, error: "Virhe suunnistuksen luomisessa" };
     }
   };
 
@@ -198,12 +220,18 @@ export const AuthContextProvider = ({ children }) => {
       const luotuSuunnistusID = docSnap.data().suunnistus.id;
       await deleteDoc(luotuPrivateRef);
       await deleteDoc(doc(pubIdsRef, luotuSuunnistus.pubCode.toString()));
+      // delete the rastit collection inside suunnistus
+      const q = query(collection(suunnistuksetRef, luotuSuunnistusID, "rastit"));
+      const snapshot = await getDocs(q);
+      snapshot.docs.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
       await deleteDoc(doc(suunnistuksetRef, luotuSuunnistusID));
       setLuotuSuunnistus(null);
       return { success: true };
     } catch (error) {
       console.error("Error ending suunnideleteDocstus:", error);
-      return { success: false, error: "Virhe suunnituksen lopettamisessa" };
+      return { success: false, error: "Virhe suunnistuksen lopettamisessa" };
     }
   };
 
@@ -235,6 +263,7 @@ export const AuthContextProvider = ({ children }) => {
         logout,
         createSuunnistus,
         addRasti,
+        deleteRasti,
         isLoggedIn,
         privateCode,
         rastit,

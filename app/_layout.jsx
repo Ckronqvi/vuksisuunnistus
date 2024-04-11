@@ -109,7 +109,7 @@ function RootLayoutNav() {
             options={{
               ...options,
               headerStyle: {
-                backgroundColor: colorScheme === "dark" ? "black" : "#236c87",
+                backgroundColor: colorScheme === "dark" ? "black" : "#2F4858",
               },
             }}
           />

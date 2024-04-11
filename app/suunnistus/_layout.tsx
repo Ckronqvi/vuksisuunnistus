@@ -6,6 +6,7 @@ import { Alert, Pressable } from 'react-native';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useAuth } from '@/context/AuthContext';
+import { BlurView } from 'expo-blur';
 
 
 function TabBarIcon(props: {
@@ -61,8 +62,13 @@ export function UserLayout() {
         options={{
           title: 'Vuksisuunnistus',
           headerTransparent: true,
-          headerBlurEffect: 'prominent',
-          // log out button on the right
+          headerTitleAlign: 'center',
+          headerBackground() {
+            return (
+              <BlurView intensity={150} style={{ flex: 1 }} />
+            );
+            
+          },
           headerRight: () => (
             <Pressable
               style={{ marginRight: 10 }}
@@ -90,7 +96,15 @@ export function AdminTabLayout() {
         options={{
           headerShown: true,
           headerTitle: 'Vuksisuunnistus',
+          headerTransparent: true,
           title: 'Kartta',
+          headerTitleAlign: 'center',
+          headerBackground() {
+            return (
+              <BlurView intensity={150} style={{ flex: 1 }} />
+            );
+            
+          },
           headerRight: () => (
             <Pressable
               style={{ marginRight: 20 }}
