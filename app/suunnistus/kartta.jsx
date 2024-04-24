@@ -13,7 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { UserLocationContext } from "@/context/UserLocationContext";
 
 export default function MapScreen() {
-  const { rastit } = useAuth();
+  const { rastit, setVisitedRasti, visitedRastit } = useAuth();
   const [selectedMarker, setSelectedMarker] = useState(null);
   const { location, setLocation } = useContext(UserLocationContext);
 
@@ -22,6 +22,12 @@ export default function MapScreen() {
   };
 
   const handleCloseModal = () => {
+    setSelectedMarker(null);
+  };
+
+  const handleVisited = async () => {
+    bool = !visitedRastit.includes(selectedMarker.id);
+    await setVisitedRasti(bool, selectedMarker.id);
     setSelectedMarker(null);
   };
 
@@ -54,6 +60,9 @@ export default function MapScreen() {
               longitude: rasti.sijainti.longitude,
             }}
             onPress={() => handleMarkerPress(rasti)}
+            // if rasti is visited, change color to green
+            pinColor={visitedRastit.includes(rasti.id) ? "gray" : "red"}
+            opacity={visitedRastit.includes(rasti.id) ? 0.7 : 1}
           />
         ))}
       </MapView>
@@ -72,9 +81,13 @@ export default function MapScreen() {
                 </Text>
                 <TouchableOpacity
                   style={styles.closeButton}
-                  onPress={handleCloseModal}
+                  onPress={handleVisited}
                 >
-                  <Text style={styles.closeButtonText}>Sulje</Text>
+                  <Text style={styles.closeButtonText}>
+                    {visitedRastit.includes(selectedMarker?.id)
+                      ? "Poista merkintä"
+                      : " Merkitse käydyksi"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
@@ -109,17 +122,22 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    paddingBottom: 30,
   },
 
   modalTitle: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
+    alignSelf: "center",
   },
 
   modalDescription: {
-    fontSize: 18,
+    fontSize: 20,
     marginBottom: 20,
+    justifyContent: "center",
+    alignContent: "center",
+    alignSelf: "center",
   },
 
   closeButton: {

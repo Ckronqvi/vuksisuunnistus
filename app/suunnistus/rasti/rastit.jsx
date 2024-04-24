@@ -5,7 +5,6 @@ import { TouchableOpacity, FlatList, StyleSheet, Alert } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
 import { buttonColor } from "@/constants/Colors";
-import { set } from "firebase/database";
 import Toast from "react-native-root-toast";
 
 const Rastit = () => {

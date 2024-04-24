@@ -23,6 +23,9 @@ export const AuthContextProvider = ({ children }) => {
   const [suunnistusID, setSuunnistusID] = useState(undefined);
   const [isLoggedIn, setIsLoggedIn] = useState(undefined);
   const [rastit, setRastit] = useState([]);
+  // visited rastit for opacity
+  const [visitedRastit, setVisitedRastit] = useState([]);
+
   // SUUNNISTUKSET LUOMISEEN: luotuSuunnistus = {pubCode, privateCode}
   const [luotuSuunnistus, setLuotuSuunnistus] = useState(null);
 
@@ -40,7 +43,10 @@ export const AuthContextProvider = ({ children }) => {
         ).then(setIsLoggedIn(true));
         return { success: true };
       } else {
-        return { success: false, error: "Suunnistusta ei löytynyt annetulla koodilla" };
+        return {
+          success: false,
+          error: "Suunnistusta ei löytynyt annetulla koodilla",
+        };
       }
     } catch (error) {
       console.error("Error getting suunnistusID:", error);
@@ -85,8 +91,24 @@ export const AuthContextProvider = ({ children }) => {
     setSuunnistusID(null);
     setIsLoggedIn(false);
     setRastit([]);
+    setVisitedRastit([]);
     await AsyncStorage.removeItem("privateCode");
     await AsyncStorage.removeItem("suunnistusID");
+    await AsyncStorage.removeItem("visitedRastit");
+  };
+
+  const setVisitedRasti = async (bool, rastiID) => {
+    let updatedVisitedRastit;
+    if (bool) {
+      updatedVisitedRastit = [...visitedRastit, rastiID];
+    } else {
+      updatedVisitedRastit = visitedRastit.filter((rasti) => rasti !== rastiID);
+    }
+    await AsyncStorage.setItem(
+      "visitedRastit",
+      JSON.stringify(updatedVisitedRastit)
+    );
+    setVisitedRastit(updatedVisitedRastit);
   };
 
   const loadUserDataFromStorage = async () => {
@@ -104,6 +126,7 @@ export const AuthContextProvider = ({ children }) => {
       }
 
       if (suunnistusIDFromStorage) {
+        await loadVisitedRastit();
         setSuunnistusID(suunnistusIDFromStorage);
         setIsLoggedIn(true);
       } else {
@@ -221,7 +244,9 @@ export const AuthContextProvider = ({ children }) => {
       await deleteDoc(luotuPrivateRef);
       await deleteDoc(doc(pubIdsRef, luotuSuunnistus.pubCode.toString()));
       // delete the rastit collection inside suunnistus
-      const q = query(collection(suunnistuksetRef, luotuSuunnistusID, "rastit"));
+      const q = query(
+        collection(suunnistuksetRef, luotuSuunnistusID, "rastit")
+      );
       const snapshot = await getDocs(q);
       snapshot.docs.forEach(async (doc) => {
         await deleteDoc(doc.ref);
@@ -254,6 +279,19 @@ export const AuthContextProvider = ({ children }) => {
     }
   }, [suunnistusID]);
 
+  const loadVisitedRastit = async () => {
+    try {
+      const visitedRastitFromStorage = await AsyncStorage.getItem(
+        "visitedRastit"
+      );
+      if (visitedRastitFromStorage) {
+        setVisitedRastit(JSON.parse(visitedRastitFromStorage));
+      }
+    } catch (error) {
+      console.error("Error loading visited rastit from AsyncStorage:", error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -263,10 +301,12 @@ export const AuthContextProvider = ({ children }) => {
         logout,
         createSuunnistus,
         addRasti,
+        setVisitedRasti,
         deleteRasti,
         isLoggedIn,
         privateCode,
         rastit,
+        visitedRastit,
         luotuSuunnistus,
       }} // TODO: Poista ylimääräset sitte lopuks.
     >

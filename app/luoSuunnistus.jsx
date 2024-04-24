@@ -85,19 +85,19 @@ const LuoSuunnistus = () => {
 
   const end = async () => {
     Alert.alert(
-      'Lopetetaanko suunnistus?',
-      'Tämä poistaa kaikki suunnistukseen liittyvät tiedot ja lopettaa suunnistuksen. Haluatko varmasti jatkaa?',
+      "Lopetetaanko suunnistus?",
+      "Tämä poistaa kaikki suunnistukseen liittyvät tiedot ja lopettaa suunnistuksen. Haluatko varmasti jatkaa?",
       [
         {
-          text: 'Peruuta',
-          style: 'cancel',
+          text: "Peruuta",
+          style: "cancel",
         },
         {
-          text: 'Kyllä',
+          text: "Kyllä",
           onPress: async () => {
             await deleteSuunnistus();
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -127,51 +127,51 @@ const LuoSuunnistus = () => {
     <View style={styles.container}>
       {publicCode !== "" && (
         <View>
-        <View style={styles.codeBox}>
-        <Text style={styles.codeTitle}>Jaa suunnistajille:</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.codeInput}
-            value={publicCode}
-            editable={false}
-          />
-          <TouchableOpacity
-            style={styles.iconContainer}
-            onPress={() => {
-              copyToClipboard(publicCode);
-            }}
-          >
-            <Ionicons
-              name="clipboard"
-              size={30}
-              color={colorScheme === "dark" ? "white" : "black"}
-            />
-          </TouchableOpacity>
+          <View style={styles.codeBox}>
+            <Text style={styles.codeTitle}>Jaa suunnistajille:</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.codeInput}
+                value={publicCode}
+                editable={false}
+              />
+              <TouchableOpacity
+                style={styles.iconContainer}
+                onPress={() => {
+                  copyToClipboard(publicCode);
+                }}
+              >
+                <Ionicons
+                  name="clipboard"
+                  size={30}
+                  color={colorScheme === "dark" ? "white" : "black"}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.codeBox}>
+            <Text style={styles.codeTitle}>Jaa rastinpitäjille:</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.codeInput}
+                value={privateCode}
+                editable={false}
+              />
+              <TouchableOpacity
+                style={styles.iconContainer}
+                onPress={() => {
+                  copyToClipboard(privateCode);
+                }}
+              >
+                <Ionicons
+                  name="clipboard"
+                  size={30}
+                  color={colorScheme === "dark" ? "white" : "black"}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
-      <View style={styles.codeBox}>
-        <Text style={styles.codeTitle}>Jaa rastinpitäjille:</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.codeInput}
-            value={privateCode}
-            editable={false}
-          />
-          <TouchableOpacity
-            style={styles.iconContainer}
-            onPress={() => {
-              copyToClipboard(privateCode);
-            }}
-          >
-            <Ionicons
-              name="clipboard"
-              size={30}
-              color={colorScheme === "dark" ? "white" : "black"}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-      </View> 
       )}
       {publicCode !== "" && (
         <TouchableOpacity
@@ -181,7 +181,7 @@ const LuoSuunnistus = () => {
           <Text style={styles.buttonText}>Lopeta suunnistus</Text>
         </TouchableOpacity>
       )}
-       {publicCode === "" && (
+      {publicCode === "" && (
         <TouchableOpacity
           style={styles.button}
           onPress={loading ? null : handleCreateSuunnistus}
@@ -244,8 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: buttonColor,
     // position the button to the bottom of the screen
     position: "absolute",
-    bottom: '25%',
-
+    bottom: "25%",
   },
   buttonText: {
     fontSize: 20,

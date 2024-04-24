@@ -1,17 +1,15 @@
 import { initializeApp, getApp } from "firebase/app";
 import { getFirestore, collection } from "firebase/firestore";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const firebaseConfig = {
     apiKey: "***REMOVED***",
     authDomain: "***REMOVED***",
-    databaseURL: "***REMOVED***",
     projectId: "***REMOVED***",
-    storageBucket: "***REMOVED***",
+    storageBucket: "***REMOVED***.appspot.com",
     messagingSenderId: "***REMOVED***",
-    appId: "***REMOVED***"
-};
+    appId: "1:***REMOVED***:web:162ded4966c2214b6adf2c"
+  };
 
 const app = initializeApp(firebaseConfig);
 

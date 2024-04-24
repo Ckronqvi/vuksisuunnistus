@@ -1,6 +1,6 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Slot, Stack, Tabs } from 'expo-router';
+import { Slot, Stack, Tabs } from 'expo-router';
 import { Alert, Pressable } from 'react-native';
 
 import Colors from '@/constants/Colors';
