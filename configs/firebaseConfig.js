@@ -3,12 +3,12 @@ import { getFirestore, collection } from "firebase/firestore";
 
 
 const firebaseConfig = {
-    apiKey: "***REMOVED***",
-    authDomain: "***REMOVED***",
-    projectId: "***REMOVED***",
-    storageBucket: "***REMOVED***.appspot.com",
-    messagingSenderId: "***REMOVED***",
-    appId: "1:***REMOVED***:web:162ded4966c2214b6adf2c"
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
   };
 
 const app = initializeApp(firebaseConfig);

@@ -1,4 +1,4 @@
-# ***REMOVED***
+# vuksisuunnistus
 
 ## Vaatimukset
 * Node.js versio 20 tai uudempi
@@ -9,11 +9,11 @@
 ## Asentaminen
 Kloonaa repository koneellesi.
 ```bash
-git clone git@github.com:Ckronqvi/***REMOVED***.git
+git clone git@github.com:Ckronqvi/vuksisuunnistus.git
 ```
 Vaihda projektin juurihakemistoon.
 ```bash
-cd ***REMOVED***/
+cd vuksisuunnistus/
 ```
 Asenna riippuvuudet.
 ```bash
